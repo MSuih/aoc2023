@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.LongStream;
 
 public class Main {
     private record Game(Hand hand, int value) implements Comparable<Game> {
@@ -17,22 +18,21 @@ public class Main {
         List<Game> sample = parse("sample.txt", false);
         List<Game> input = parse("input.txt", false);
 
-        sortAndPrint(sample);
-        sortAndPrint(input);
+        countAndPrint(sample);
+        countAndPrint(input);
 
         List<Game> sampleP2 = parse("sample.txt", true);
         List<Game> inputP2 = parse("input.txt", true);
 
-        sortAndPrint(sampleP2);
-        sortAndPrint(inputP2);
+        countAndPrint(sampleP2);
+        countAndPrint(inputP2);
 
     }
 
-    private static void sortAndPrint(List<Game> games) {
-        long sum = 0;
-        for (int i = 0; i < games.size(); i++) {
-            sum += (i + 1L) * games.get(i).value;
-        }
+    private static void countAndPrint(List<Game> games) {
+        long sum = LongStream.rangeClosed(1, games.size())
+                .map(l -> l * games.get((int) (l - 1)).value)
+                .sum();
         System.out.println("Games won you " + sum);
     }
 

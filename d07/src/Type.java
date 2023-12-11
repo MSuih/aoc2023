@@ -1,7 +1,6 @@
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public enum Type {
     HIGH_CARD, ONE_PAIR, TWO_PAIR, THREE_OF_KIND, FULL_HOUSE, FOUR_OF_KIND, FIVE_OF_KIND;
@@ -50,6 +49,10 @@ public enum Type {
                 .max(Comparator.naturalOrder())
                 .orElse(FIVE_OF_KIND);
 
+        return handleSpecial(jokerCount, type, foundTypes);
+    }
+
+    private static Type handleSpecial(int jokerCount, Type type, Map<Type, Integer> foundTypes) {
         if (jokerCount > 0) {
             if (type == FOUR_OF_KIND) {
                 return FIVE_OF_KIND;
