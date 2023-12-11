@@ -18,7 +18,7 @@ public enum Type {
     }
 
     public static Type fromCards(Card[] cards) {
-        Map<Type, AtomicInteger> foundTypes = new EnumMap<>(Type.class);
+        Map<Type, Integer> foundTypes = new EnumMap<>(Type.class);
         boolean[] skip = new boolean[5];
         int jokerCount = 0;
         for (int i = 0; i < cards.length; i++) {
@@ -26,6 +26,9 @@ public enum Type {
             int same = 1;
             if (first == Card.JOKER) {
                 jokerCount++;
+                continue;
+            }
+            if (skip[i]) {
                 continue;
             }
             for (int j = i + 1; j < cards.length; j++) {
@@ -41,15 +44,12 @@ public enum Type {
                 }
             }
             Type type = fromNumber(same);
-            foundTypes.computeIfAbsent(type, (v) -> new AtomicInteger()).getAndIncrement();
+            foundTypes.put(type, foundTypes.getOrDefault(type, 0) + 1);
         }
         Type type = foundTypes.keySet().stream()
                 .max(Comparator.naturalOrder())
                 .orElse(FIVE_OF_KIND);
 
-        if (type == FIVE_OF_KIND) {
-            return type;
-        }
         if (jokerCount > 0) {
             if (type == FOUR_OF_KIND) {
                 return FIVE_OF_KIND;
@@ -57,7 +57,7 @@ public enum Type {
             if (type == THREE_OF_KIND) {
                 return jokerCount > 1 ? FIVE_OF_KIND : FOUR_OF_KIND;
             }
-            if (type == ONE_PAIR && foundTypes.get(ONE_PAIR).get() > 1) {
+            if (type == ONE_PAIR && foundTypes.get(ONE_PAIR) > 1) {
                 return FULL_HOUSE;
             }
             if (type == ONE_PAIR) {
@@ -72,17 +72,14 @@ public enum Type {
                 case 1 -> ONE_PAIR;
                 case 2 -> THREE_OF_KIND;
                 case 3 -> FOUR_OF_KIND;
-                case 4 -> FIVE_OF_KIND;
+                case 4, 5 -> FIVE_OF_KIND;
                 default -> throw new IllegalStateException();
             };
         } else {
-            if (type == FOUR_OF_KIND) {
-                return type;
-            }
             if (foundTypes.containsKey(THREE_OF_KIND) && foundTypes.containsKey(ONE_PAIR)) {
                 return FULL_HOUSE;
             }
-            if (foundTypes.containsKey(ONE_PAIR) && foundTypes.get(ONE_PAIR).get() == 2) {
+            if (foundTypes.containsKey(ONE_PAIR) && foundTypes.get(ONE_PAIR) == 2) {
                 return TWO_PAIR;
             }
         }
